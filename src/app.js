@@ -20,16 +20,19 @@ import DBManager from "./mongo/ds.js"
 import { ENV_CONFIG } from './config/config.js';
 import emailRouter from "./router/email.routes.js"
 import smsRouter from "./mocking/mock.router.js"
-import { addLogger } from './config/logger.js';
-import loggerRouter from "./router/logger.routes.js"
 import mockingRouter from './mocking/mock.router.js';
+import { addLogger, devLogger } from './config/logger.js';
+import loggerRouter from "./router/logger.routes.js"
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUIExpress from "swagger-ui-express"
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
 const httpServer = app.listen(PORT, () => {
-    console.log(`Servidor express puerto: ${PORT}`);
+    devLogger.info("Servidor escuchando en el puerto " + PORT);
 });
+
 export const socketServer = new Server(httpServer);
 const CM = new ChatManager();
 
@@ -51,7 +54,27 @@ app.use(
     })
 );
 
+// swagger 
+
+const swaggerOptions = {
+    definition: {
+        openapi: "3.0.1",
+
+        info: {
+            title: "Documentacion API Adoptme",
+
+            description: "Documentacion del uso de las apis relacionadas.",
+        },
+    },
+
+    apis: [`./src/docs/**/*.yaml`],
+};
+
+const specs = swaggerJSDoc(swaggerOptions);
+
+//logger
 app.use(addLogger);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -67,18 +90,23 @@ app.use(
     })
 );
 app.use(cookieParser());
+
+//passport
 app.use(passport.initialize());
 app.use(passport.session());
 initializePassport();
+
+//Rutas
 
 app.use("/api/product/", ProductRouter);
 app.use("/api/cart/", CartRouter);
 app.use("/", viewsRouter);
 app.use("/api/sessions", sessionsRouter);
-app.use("/", viewsRouter);
 app.use("email", emailRouter);
 app.use("/mockingproducts", mockingRouter);
-app.use("loggerTest", loggerRouter)
+app.use("/sms", smsRouter);
+app.use("loggerTest", loggerRouter);
+app.use("/apidocs", swaggerUIExpress.serve, swaggerUIExpress.setup(specs));
 
 mongoose.connect(process.env.MONGO_URL)
 
