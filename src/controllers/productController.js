@@ -1,5 +1,5 @@
 import ProductService from "../services/productService.js";
-import { socketServer } from "../../app.js";
+import { socketServer } from "../app.js";
 import mongoose from "mongoose";
 import CustomError from "../services/errors/customError.js";
 import { generateProductErrorInfo } from "../services/errors/messages/product-error.js";

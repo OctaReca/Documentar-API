@@ -1,7 +1,7 @@
 import { Router } from "express";
 import ProductManager from "../dao/ProductManager.js";
 import ProductService from "../services/productService.js";
-import productController from "../controllers/productControllers.js";
+import productController from "../controllers/productController.js";
 import { authorization, passportCall } from ".././utils.js";
 import errorHandler from "../middlewares/errorHandler.js";
 
