@@ -27,7 +27,7 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUIExpress from "swagger-ui-express"
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = ENV_CONFIG.port || 8080;
 
 const httpServer = app.listen(PORT, () => {
     devLogger.info("Servidor escuchando en el puerto " + PORT);
@@ -82,9 +82,11 @@ app.use(
         secret: process.env.SECRET_KEY_SESSION,
         resave: false,
         saveUninitialized: true,
-        cookie: { secure: false },
+        cookie: { 
+            secure: false 
+        },
         store: MongoStore.create({
-            mongoUrl: process.env.MONGO_CNX_STR,
+            mongoUrl: process.env.MONGODB_CNX_STR,
             collectionName: "sessions",
         }),
     })
@@ -107,16 +109,6 @@ app.use("/mockingproducts", mockingRouter);
 app.use("/sms", smsRouter);
 app.use("loggerTest", loggerRouter);
 app.use("/apidocs", swaggerUIExpress.serve, swaggerUIExpress.setup(specs));
-
-mongoose.connect(process.env.MONGO_URL)
-
-mongoose.connection.on("connected", () => {
-    console.log("Conectado a MongoDB");
-});
-
-mongoose.connection.on("error", (err) => {
-    console.error("Error conectando a MongoDB:", err);
-});
 
 socketServer.on("connection", async (socket) => {
     console.log("Nueva Conexión!");
